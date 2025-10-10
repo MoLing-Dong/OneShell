@@ -106,11 +106,16 @@ download_go() {
     local download_url="https://go.dev/dl/${filename}"
     
     print_info "Downloading Go ${version} for ${os}-${arch}..."
+    echo >&2
     
-    if ! curl -L -o "/tmp/${filename}" "${download_url}"; then
+    # Use curl with progress bar (--progress-bar shows a cleaner single progress bar)
+    if ! curl --progress-bar -L -o "/tmp/${filename}" "${download_url}"; then
         print_error "Failed to download Go"
         exit 1
     fi
+    
+    echo >&2
+    print_success "Download completed"
     
     echo "/tmp/${filename}"
 }
@@ -127,8 +132,23 @@ install_go() {
         rm -rf "${INSTALL_DIR}/go"
     fi
     
-    # Extract archive
-    tar -C "${INSTALL_DIR}" -xzf "${archive}"
+    # Extract archive with progress indicator
+    print_info "Extracting archive (this may take a moment)..."
+    
+    # Show a simple spinner while extracting
+    {
+        tar -C "${INSTALL_DIR}" -xzf "${archive}" &
+        local pid=$!
+        local spin='-\|/'
+        local i=0
+        while kill -0 $pid 2>/dev/null; do
+            i=$(( (i+1) %4 ))
+            printf "\r${BLUE}[INFO]${NC} Extracting... ${spin:$i:1}"
+            sleep .1
+        done
+        wait $pid
+        printf "\r"
+    }
     
     if [[ ! -d "${INSTALL_DIR}/go" ]]; then
         print_error "Installation failed: Go directory not found"
