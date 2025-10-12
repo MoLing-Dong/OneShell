@@ -8,6 +8,9 @@
 
 set -e  # Exit on error
 
+# Temporary file tracking
+TEMP_FILES=()
+
 # Color definitions
 RED='\033[0;31m'
 GREEN='\033[0;32m'
@@ -108,16 +111,21 @@ download_go() {
     print_info "Downloading Go ${version} for ${os}-${arch}..."
     echo >&2
     
+    local temp_file="/tmp/${filename}"
+    
     # Use curl with progress bar (--progress-bar shows a cleaner single progress bar)
-    if ! curl --progress-bar -L -o "/tmp/${filename}" "${download_url}"; then
+    if ! curl --progress-bar -L -o "$temp_file" "${download_url}"; then
         print_error "Failed to download Go"
         exit 1
     fi
     
+    # Track temp file for cleanup
+    TEMP_FILES+=("$temp_file")
+    
     echo >&2
     print_success "Download completed"
     
-    echo "/tmp/${filename}"
+    echo "$temp_file"
 }
 
 # Install Go
@@ -236,12 +244,28 @@ verify_installation() {
     fi
 }
 
-# Cleanup
+# Cleanup function - called automatically on exit
 cleanup() {
-    print_info "Cleaning up temporary files..."
-    rm -f /tmp/go*.tar.gz
-    print_success "Cleanup completed"
+    local exit_code=$?
+    
+    if [[ ${#TEMP_FILES[@]} -gt 0 ]]; then
+        print_info "Cleaning up temporary files..."
+        for file in "${TEMP_FILES[@]}"; do
+            if [[ -f "$file" ]]; then
+                rm -f "$file"
+            fi
+        done
+        print_success "Cleanup completed"
+    fi
+    
+    # Also clean up any other Go archives in /tmp
+    rm -f /tmp/go*.tar.gz 2>/dev/null || true
+    
+    return $exit_code
 }
+
+# Set trap to ensure cleanup on exit (success or failure)
+trap cleanup EXIT INT TERM
 
 # Main installation process
 main() {
@@ -278,7 +302,6 @@ main() {
     install_go "$archive"
     configure_environment
     verify_installation
-    cleanup
     
     echo
     echo "================================================"
