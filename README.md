@@ -7,13 +7,13 @@ OneShell is a simple shell scripting for installing and configuring software on 
 **Install Go:**
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/MoLing-Dong/OneShell/refs/heads/master/golang_install.sh | sudo bash
+curl -fsSL https://raw.githubusercontent.com/MoLing-Dong/OneShell/master/golang_install.sh | sudo bash
 ```
 
 **Uninstall Go：**
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/MoLing-Dong/OneShell/refs/heads/master/golang_uninstall.sh | sudo bash
+curl -fsSL https://raw.githubusercontent.com/MoLing-Dong/OneShell/master/golang_uninstall.sh | sudo bash
 ```
 
 ## Node
@@ -23,3 +23,11 @@ curl -fsSL https://raw.githubusercontent.com/MoLing-Dong/OneShell/refs/heads/mas
 ## Python
 
 推荐使用uvenv 管理python版本
+
+## Linux
+
+### sshd
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/MoLing-Dong/OneShell/refs/heads/master/ssh_setup.sh | sudo bash
+```
