@@ -205,7 +205,7 @@ select_language() {
     echo "1) English"
     echo "2) 中文 (Chinese)"
     echo
-    read -p "Enter your choice (1-2): " -n 1 -r < /dev/tty
+    read -p "Enter your choice (1-2): " -r < /dev/tty
     echo
     case $REPLY in
         1)
@@ -234,7 +234,7 @@ select_operation() {
     echo "2) $(tr UNINSTALL)"
     echo "3) $(tr EXIT)"
     echo
-    read -p "$(tr ENTER_CHOICE)" -n 1 -r < /dev/tty
+    read -p "$(tr ENTER_CHOICE)" -r < /dev/tty
     echo
     case $REPLY in
         1)
@@ -258,7 +258,7 @@ check_root() {
     if [[ $EUID -ne 0 ]]; then
         print_warning "$(printf "$(tr NOT_ROOT_WARNING)")"
         print_info "$(printf "$(tr SUDO_TIP)")"
-        read -p "$(printf "$(tr CONTINUE_PROMPT)")" -n 1 -r < /dev/tty
+        read -p "$(printf "$(tr CONTINUE_PROMPT)")" -r < /dev/tty
         echo
         if [[ ! $REPLY =~ ^[Yy]$ ]]; then
             exit 1
@@ -543,7 +543,7 @@ uninstall_go() {
 
     # Confirm uninstall
     echo
-    read -p "$(printf "$(tr UNINSTALL_CONFIRM)")" -n 1 -r < /dev/tty
+    read -p "$(printf "$(tr UNINSTALL_CONFIRM)")" -r < /dev/tty
     echo
     if [[ ! $REPLY =~ ^[Yy]$ ]]; then
         print_info "$(tr UNINSTALL_CANCEL)"
@@ -574,7 +574,7 @@ uninstall_go() {
     local gopath="$HOME/go"
     if [[ -d "$gopath" ]]; then
         echo
-        read -p "$(printf "$(tr REMOVE_GOPATH)" "$gopath")" -n 1 -r < /dev/tty
+        read -p "$(printf "$(tr REMOVE_GOPATH)" "$gopath")" -r < /dev/tty
         echo
         if [[ $REPLY =~ ^[Yy]$ ]]; then
             print_info "$(tr REMOVING_GOPATH)"
@@ -634,7 +634,7 @@ main_install() {
     local existing_version=$(check_existing_go)
     if [[ -n "$existing_version" ]]; then
         print_warning "$(printf "$(tr ALREADY_INSTALLED)" "$existing_version")"
-        read -p "$(printf "$(tr REINSTALL_PROMPT)")" -n 1 -r < /dev/tty
+        read -p "$(printf "$(tr REINSTALL_PROMPT)")" -r < /dev/tty
         echo
         if [[ ! $REPLY =~ ^[Yy]$ ]]; then
             print_info "$(tr INSTALL_CANCEL)"

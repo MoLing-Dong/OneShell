@@ -210,7 +210,7 @@ select_language() {
     echo "1) English"
     echo "2) 中文 (Chinese)"
     echo
-    read -p "Enter your choice (1-2): " -n 1 -r
+    read -p "Enter your choice (1-2): " -r < /dev/tty
     echo
     case $REPLY in
         1)
@@ -258,7 +258,7 @@ select_operation() {
     echo "3) $(tr UNINSTALL)"
     echo "4) $(tr EXIT)"
     echo
-    read -p "$(tr ENTER_CHOICE)" -r
+    read -p "$(tr ENTER_CHOICE)" -r < /dev/tty
     echo
     case $REPLY in
         1)
@@ -285,7 +285,7 @@ check_root() {
     if [[ $EUID -ne 0 ]]; then
         print_warning "$(printf "$(tr NOT_ROOT_WARNING)")"
         print_info "$(printf "$(tr SUDO_TIP)")"
-        read -p "$(printf "$(tr CONTINUE_PROMPT)")" -n 1 -r
+        read -p "$(printf "$(tr CONTINUE_PROMPT)")" -r < /dev/tty
         echo
         if [[ ! $REPLY =~ ^[Yy]$ ]]; then
             exit 1
@@ -573,7 +573,7 @@ uninstall_maven() {
 
     # Confirm uninstall
     echo
-    read -p "$(printf "$(tr UNINSTALL_CONFIRM)")" -n 1 -r
+    read -p "$(printf "$(tr UNINSTALL_CONFIRM)")" -r < /dev/tty
     echo
     if [[ ! $REPLY =~ ^[Yy]$ ]]; then
         print_info "$(tr UNINSTALL_CANCEL)"
@@ -688,7 +688,7 @@ main_install() {
         IFS='|' read -r existing_version existing_home <<< "$existing_info"
         print_warning "$(printf "$(tr ALREADY_INSTALLED) %s" "$existing_version")"
         print_info "$(printf "$(tr MAVEN_HOME)" "$existing_home")"
-        read -p "$(printf "$(tr REINSTALL_PROMPT)")" -n 1 -r
+        read -p "$(printf "$(tr REINSTALL_PROMPT)")" -r < /dev/tty
         echo
         if [[ ! $REPLY =~ ^[Yy]$ ]]; then
             print_info "$(tr INSTALL_CANCEL)"
@@ -751,7 +751,7 @@ main() {
         esac
 
         echo
-        read -p "$(tr PRESS_ENTER)" -r
+        read -p "$(tr PRESS_ENTER)" -r < /dev/tty
     done
 }
 
