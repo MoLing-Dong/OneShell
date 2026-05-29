@@ -99,6 +99,15 @@ TR_en_REMOVING_GOPATH="Removing GOPATH directory..."
 TR_en_GOPATH_REMOVED="GOPATH directory removed"
 TR_en_BACKUP_NOTE="A backup of your configuration files has been created with .bak extension"
 TR_en_UNINSTALL_FINISH="Uninstallation completed. Please restart your terminal or run: source %s"
+TR_en_SELECT_VERSION="Select Go version:"
+TR_en_LATEST_VERSION_OPTION="Install latest version (recommended)"
+TR_en_CHOOSE_FROM_LIST="Choose from available versions"
+TR_en_ENTER_MANUALLY="Enter version manually"
+TR_en_AVAILABLE_VERSIONS="Available Go versions (newest first):"
+TR_en_SELECT_FROM_LIST="Select a version (1-%d): "
+TR_en_ENTER_VERSION="Enter Go version (e.g., 1.22.5): "
+TR_en_INVALID_VERSION="Invalid version format. Expected format: X.Y.Z"
+TR_en_FETCHING_VERSIONS="Fetching available Go versions..."
 
 # Chinese
 TR_zh_TITLE="Go 语言安装卸载管理器"
@@ -170,6 +179,15 @@ TR_zh_REMOVING_GOPATH="正在删除 GOPATH 目录..."
 TR_zh_GOPATH_REMOVED="GOPATH 目录已删除"
 TR_zh_BACKUP_NOTE="配置文件的备份已创建，扩展名是 .bak"
 TR_zh_UNINSTALL_FINISH="卸载完成，请重启终端或运行: source %s"
+TR_zh_SELECT_VERSION="选择 Go 版本:"
+TR_zh_LATEST_VERSION_OPTION="安装最新版本 (推荐)"
+TR_zh_CHOOSE_FROM_LIST="从可用版本中选择"
+TR_zh_ENTER_MANUALLY="手动输入版本号"
+TR_zh_AVAILABLE_VERSIONS="可用的 Go 版本 (最新在前):"
+TR_zh_SELECT_FROM_LIST="选择版本 (1-%d): "
+TR_zh_ENTER_VERSION="输入 Go 版本号 (例如 1.22.5): "
+TR_zh_INVALID_VERSION="版本格式无效。期望格式: X.Y.Z"
+TR_zh_FETCHING_VERSIONS="正在获取可用的 Go 版本..."
 
 # Print functions (output to stderr to avoid capture in command substitution)
 print_info() {
@@ -304,6 +322,80 @@ get_latest_version() {
         print_error "$(tr FETCH_FAIL)"
         exit 1
     fi
+    echo "$version"
+}
+
+# List available Go versions
+list_available_versions() {
+    print_info "$(tr FETCHING_VERSIONS)"
+    local versions=$(curl -s https://go.dev/dl/?mode=json | grep -oP '"version":\s*"\Kgo[0-9.]+' | head -20)
+    if [[ -z "$versions" ]]; then
+        print_error "$(tr FETCH_FAIL)"
+        return 1
+    fi
+    echo "$versions"
+}
+
+# Select Go version interactively
+select_go_version() {
+    echo
+    echo "================================================"
+    echo "$(tr SELECT_VERSION)"
+    echo "================================================"
+    echo
+    echo "1) $(tr LATEST_VERSION_OPTION)"
+    echo "2) $(tr CHOOSE_FROM_LIST)"
+    echo "3) $(tr ENTER_MANUALLY)"
+    echo
+    read -p "$(tr ENTER_CHOICE)" -r < /dev/tty
+    echo
+
+    local version=""
+    case $REPLY in
+        1)
+            version=$(get_latest_version)
+            ;;
+        2)
+            local versions=$(list_available_versions)
+            if [[ $? -ne 0 || -z "$versions" ]]; then
+                print_error "$(tr FETCH_FAIL)"
+                return 1
+            fi
+            echo
+            echo "$(tr AVAILABLE_VERSIONS)"
+            echo
+            local i=1
+            while IFS= read -r ver; do
+                echo "  $i) $ver"
+                i=$((i + 1))
+            done <<< "$versions"
+            echo
+            local count=$((i - 1))
+            read -p "$(printf "$(tr SELECT_FROM_LIST)" "$count")" -r < /dev/tty
+            echo
+            if [[ $REPLY -ge 1 && $REPLY -le $count ]]; then
+                version=$(echo "$versions" | sed -n "${REPLY}p")
+            else
+                print_error "$(tr INVALID_CHOICE)"
+                return 1
+            fi
+            ;;
+        3)
+            read -p "$(tr ENTER_VERSION)" -r < /dev/tty
+            echo
+            if [[ $REPLY =~ ^[0-9]+\.[0-9]+(\.[0-9]+)?$ ]]; then
+                version="go$REPLY"
+            else
+                print_error "$(tr INVALID_VERSION)"
+                return 1
+            fi
+            ;;
+        *)
+            print_error "$(tr INVALID_CHOICE)"
+            return 1
+            ;;
+    esac
+
     echo "$version"
 }
 
@@ -642,7 +734,11 @@ main_install() {
         fi
     fi
 
-    local latest_version=$(get_latest_version)
+    local latest_version=$(select_go_version)
+    if [[ $? -ne 0 || -z "$latest_version" ]]; then
+        print_error "$(tr INSTALL_CANCEL)"
+        exit 1
+    fi
     print_success "$(printf "$(tr LATEST_VERSION)" "$latest_version")"
 
     if [[ "$existing_version" == "$latest_version" ]]; then

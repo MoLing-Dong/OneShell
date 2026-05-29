@@ -13,11 +13,31 @@ curl -fsSL https://raw.githubusercontent.com/MoLing-Dong/OneShell/master/golang_
 ```
 
 **Features:**
+- Version selection: latest, choose from list, or enter manually
 - Automatically fetches latest version from go.dev
 - Detects system architecture (amd64/arm64/armv6l/386)
 - Supports installation to `/usr/local` (root) or `~/.local` (user)
 - Auto-configures environment variables in `.bashrc`, `.zshrc`, `.profile`
 - Complete uninstall option, can optionally remove GOPATH
+- English/Chinese bilingual interface
+
+---
+
+### Java JDK Manager
+
+Install or uninstall Java JDK from Adoptium (Eclipse Temurin):
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/MoLing-Dong/OneShell/master/jdk_manager.sh | sudo bash
+```
+
+**Features:**
+- Uses Adoptium (Eclipse Temurin) - free, open source, LTS support
+- Version selection: latest LTS, choose from list (8/11/17/21), or enter manually
+- Detects system architecture (x64/aarch64/arm/s390x/ppc64le)
+- Supports installation to `/usr/local` (root) or `~/.local` (user)
+- Auto-configures `JAVA_HOME` and `PATH`
+- Complete uninstall capability
 - English/Chinese bilingual interface
 
 ---
@@ -31,6 +51,7 @@ curl -fsSL https://raw.githubusercontent.com/MoLing-Dong/OneShell/master/maven_m
 ```
 
 **Features:**
+- Version selection: latest, choose from list, or enter manually
 - Automatically fetches latest version from maven.apache.org
 - Downloads from official Apache archive
 - Checks for Java installation (does not install Java automatically)
@@ -68,7 +89,7 @@ After installation, you can SSH directly into your WSL from Windows.
 Install ShellCrash (simple installer):
 
 ```bash
-wget -O install_shellcrash.sh https://raw.githubusercontent.com/MoLing-Dong/OneShell/master/shellcrash_install.sh && bash install_shellcrash.sh
+wget -O install_shellcrash.sh https://raw.githubusercontent.com/MoLing-Dong/OneShell/master/shellcrash.sh && bash install_shellcrash.sh
 ```
 
 ---

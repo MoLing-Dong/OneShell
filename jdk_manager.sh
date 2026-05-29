@@ -1,10 +1,10 @@
 #!/bin/bash
 
 ##############################################################################
-# Apache Maven Installation & Uninstallation Manager
-# Description: Automatically download and install Maven from official website,
-#              or uninstall existing Maven installation. Supports multiple languages.
-# Usage: sudo bash maven_manager.sh
+# Java JDK Installation & Uninstallation Manager
+# Description: Automatically install JDK from Adoptium (Eclipse Temurin) or
+#              uninstall existing JDK installation. Supports multiple languages.
+# Usage: sudo bash jdk_manager.sh
 ##############################################################################
 
 set -e  # Exit on error
@@ -21,178 +21,175 @@ NC='\033[0m' # No Color
 
 # Configuration
 INSTALL_DIR="/usr/local"
+JDK_DIR_NAME="jdk"
 
 # Language settings (default: English)
 LANG_SELECTION="en"
 
 # Translations
 # English
-TR_en_TITLE="Apache Maven Installation & Uninstallation Manager"
-TR_en_WELCOME="Welcome to Maven Manager"
+TR_en_TITLE="Java JDK Installation & Uninstallation Manager"
+TR_en_WELCOME="Welcome to JDK Manager"
 TR_en_SELECT_LANG="Please select your language / 请选择你的语言:"
 TR_en_SELECT_OP="Please select operation:"
-TR_en_INSTALL="Install Maven"
-TR_en_UNINSTALL="Uninstall Maven"
-TR_en_CHECK="Check Maven Status"
+TR_en_INSTALL="Install JDK"
+TR_en_UNINSTALL="Uninstall JDK"
+TR_en_CHECK="Check JDK Status"
 TR_en_EXIT="Exit"
 TR_en_ENTER_CHOICE="Enter your choice (1-4): "
 TR_en_INVALID_CHOICE="Invalid choice, exiting..."
 TR_en_NOT_ROOT_WARNING="This script is not running as root. Installation to /usr/local requires root privileges."
 TR_en_SUDO_TIP="You can run: sudo bash $0"
 TR_en_CONTINUE_PROMPT="Continue with current user privileges? (y/n): "
-TR_en_UNSUPPORTED_OS="Unsupported operating system"
-TR_en_DETECTED_OS="Detected operating system: %s"
-TR_en_FETCH_FAIL="Failed to fetch the latest Maven version information"
-TR_en_FETCHING="Fetching latest Maven version..."
+TR_en_UNSUPPORTED_ARCH="Unsupported architecture: %s"
+TR_en_FETCH_FAIL="Failed to fetch JDK version information"
+TR_en_FETCHING="Fetching available JDK versions..."
 TR_en_LATEST_VERSION="Latest version available: %s"
-TR_en_ALREADY_INSTALLED="Maven is already installed:"
+TR_en_ALREADY_INSTALLED="JDK is already installed:"
 TR_en_VERSION_INFO="Version: %s"
-TR_en_MAVEN_HOME="Maven home: %s"
-TR_en_REINSTALL_PROMPT="Do you want to reinstall/update Maven? (y/n): "
+TR_en_JAVA_HOME="JAVA_HOME: %s"
+TR_en_REINSTALL_PROMPT="Do you want to reinstall/update JDK? (y/n): "
 TR_en_INSTALL_CANCEL="Installation cancelled"
 TR_en_ALREADY_LATEST="You already have the latest version installed"
-TR_en_CHECK_JDK="Checking for Java installation..."
-TR_en_JDK_NOT_FOUND="Java (JDK) is not installed. Maven requires Java to run."
-TR_en_JDK_FOUND="Java found:"
-TR_en_JDK_VERSION="Java version: %s"
-TR_en_DOWNLOADING="Downloading Maven %s..."
+TR_en_DOWNLOADING="Downloading JDK %s for %s..."
 TR_en_DOWNLOAD_COMPLETE="Download completed"
-TR_en_DOWNLOAD_FAIL="Failed to download Maven"
-TR_en_INSTALLING="Installing Maven to %s..."
-TR_en_REMOVING_OLD="Removing old Maven installation..."
+TR_en_DOWNLOAD_FAIL="Failed to download JDK"
+TR_en_INSTALLING="Installing JDK to %s..."
+TR_en_REMOVING_OLD="Removing old JDK installation..."
 TR_en_EXTRACTING="Extracting archive..."
-TR_en_EXTRACT_FAIL="Installation failed: Maven directory not found"
-TR_en_EXTRACT_SUCCESS="Maven extracted successfully"
+TR_en_EXTRACT_FAIL="Installation failed: JDK directory not found"
+TR_en_EXTRACT_SUCCESS="JDK extracted successfully"
 TR_en_CONFIGURING="Configuring environment variables..."
 TR_en_BACKUP_CREATED="Created backup: %s"
 TR_en_ENV_ADDED="Environment variables added to %s"
-TR_en_ENV_EXISTS="Maven environment variables already exist in %s"
+TR_en_ENV_EXISTS="JDK environment variables already exist in %s"
 TR_en_UPDATING_CONFIG="Updating existing configuration..."
 TR_en_CONFIG_UPDATED="Configuration updated"
 TR_en_CONFIG_ERROR="Syntax error detected in %s!"
 TR_en_RESTORING_BACKUP="Restoring from backup..."
 TR_en_BACKUP_RESTORED="Backup restored successfully"
 TR_en_VERIFYING="Verifying installation..."
-TR_en_INSTALL_SUCCESS="Maven installed successfully!"
+TR_en_INSTALL_SUCCESS="JDK installed successfully!"
 TR_en_VERIFY_FAIL="Installation verification failed"
 TR_en_SOURCE_TIP="Please manually run: source %s"
 TR_en_INSTALL_COMPLETE="Installation completed successfully!"
-TR_en_CONFIG_DONE="Maven is now configured"
-TR_en_SOURCE_CURRENT="To use Maven in your CURRENT terminal, run:"
-TR_en_AUTO_NEW="For NEW terminals, Maven will work automatically!"
+TR_en_CONFIG_DONE="JDK is now configured"
+TR_en_SOURCE_CURRENT="To use JDK in your CURRENT terminal, run:"
+TR_en_AUTO_NEW="For NEW terminals, JDK will work automatically!"
 TR_en_VERIFY_CMD="Verify installation with:"
 TR_en_CLEANING="Cleaning up temporary files..."
 TR_en_CLEANUP_DONE="Cleanup completed"
-TR_en_UNINSTALL_TITLE="Starting Maven uninstallation..."
-TR_en_FINDING_MAVEN="Searching for existing Maven installation..."
-TR_en_MAVEN_NOT_FOUND="No existing Maven installation found"
-TR_en_MAVEN_FOUND="Found Maven installation at: %s"
-TR_en_UNINSTALL_CONFIRM="Are you sure you want to uninstall Maven? This will remove the Maven installation and clean up environment variables. (y/n): "
+TR_en_UNINSTALL_TITLE="Starting JDK uninstallation..."
+TR_en_FINDING_JDK="Searching for existing JDK installation..."
+TR_en_JDK_NOT_FOUND="No existing JDK installation found"
+TR_en_JDK_FOUND="Found JDK installation at: %s"
+TR_en_UNINSTALL_CONFIRM="Are you sure you want to uninstall JDK? This will remove the JDK installation and clean up environment variables. (y/n): "
 TR_en_UNINSTALL_CANCEL="Uninstallation cancelled"
-TR_en_REMOVING_MAVEN="Removing Maven installation directory..."
-TR_en_REMOVING_MAVEN_DONE="Maven installation directory removed"
-TR_en_REMOVING_ENV="Removing Maven environment variables from configuration files..."
-TR_en_ENV_REMOVED="Maven environment variables removed"
-TR_en_UNINSTALL_SUCCESS="Maven uninstalled successfully!"
+TR_en_REMOVING_JDK="Removing JDK installation directory..."
+TR_en_REMOVING_JDK_DONE="JDK installation directory removed"
+TR_en_REMOVING_ENV="Removing JDK environment variables from configuration files..."
+TR_en_ENV_REMOVED="JDK environment variables removed"
+TR_en_UNINSTALL_SUCCESS="JDK uninstalled successfully!"
 TR_en_UNINSTALL_DONE="Uninstallation completed"
 TR_en_BACKUP_NOTE="A backup of your configuration files has been created with .bak extension"
 TR_en_UNINSTALL_FINISH="Uninstallation completed. Please restart your terminal or run: source %s"
-TR_en_MAVEN_NOT_INSTALLED="Maven is not installed"
-TR_en_MAVEN_INSTALLED="Maven is installed"
+TR_en_JDK_NOT_INSTALLED="JDK is not installed"
+TR_en_JDK_INSTALLED="JDK is installed"
 TR_en_PRESS_ENTER="Press Enter to return to menu..."
-TR_en_SELECT_VERSION="Select Maven version:"
-TR_en_LATEST_VERSION_OPTION="Install latest version (recommended)"
+TR_en_SELECT_VERSION="Select JDK version:"
+TR_en_LATEST_VERSION_OPTION="Install latest LTS version (recommended)"
+TR_en_CHOOSE_LTS="Choose LTS version"
 TR_en_CHOOSE_FROM_LIST="Choose from available versions"
 TR_en_ENTER_MANUALLY="Enter version manually"
-TR_en_AVAILABLE_VERSIONS="Available Maven versions (newest first):"
+TR_en_AVAILABLE_VERSIONS="Available JDK LTS versions:"
 TR_en_SELECT_FROM_LIST="Select a version (1-%d): "
-TR_en_ENTER_VERSION="Enter Maven version (e.g., 3.9.9): "
-TR_en_INVALID_VERSION="Invalid version format. Expected format: X.Y.Z"
-TR_en_FETCHING_VERSIONS="Fetching available Maven versions..."
+TR_en_ENTER_VERSION="Enter JDK version (e.g., 21): "
+TR_en_INVALID_VERSION="Invalid version. Available: 8, 11, 17, 21"
+TR_en_FETCHING_VERSIONS="Fetching available JDK versions..."
+TR_en_SELECT_LTS="Select LTS version:"
+TR_en_LTS_VERSIONS="Available LTS versions:"
 
 # Chinese
-TR_zh_TITLE="Apache Maven 安装卸载管理器"
-TR_zh_WELCOME="欢迎使用 Maven 管理器"
+TR_zh_TITLE="Java JDK 安装卸载管理器"
+TR_zh_WELCOME="欢迎使用 JDK 管理器"
 TR_zh_SELECT_LANG="请选择你的语言 / Please select your language:"
 TR_zh_SELECT_OP="请选择操作:"
-TR_zh_INSTALL="安装 Maven"
-TR_zh_UNINSTALL="卸载 Maven"
-TR_zh_CHECK="检查 Maven 状态"
+TR_zh_INSTALL="安装 JDK"
+TR_zh_UNINSTALL="卸载 JDK"
+TR_zh_CHECK="检查 JDK 状态"
 TR_zh_EXIT="退出"
 TR_zh_ENTER_CHOICE="请输入你的选择 (1-4): "
 TR_zh_INVALID_CHOICE="无效选择，退出..."
 TR_zh_NOT_ROOT_WARNING="当前不是 root 用户，安装到 /usr/local 需要 root 权限"
 TR_zh_SUDO_TIP="你可以使用: sudo bash $0"
 TR_zh_CONTINUE_PROMPT="是否继续使用当前用户权限安装？(y/n): "
-TR_zh_UNSUPPORTED_OS="不支持的操作系统"
-TR_zh_DETECTED_OS="检测到操作系统: %s"
-TR_zh_FETCH_FAIL="获取最新 Maven 版本信息失败"
-TR_zh_FETCHING="正在获取最新 Maven 版本..."
+TR_zh_UNSUPPORTED_ARCH="不支持的架构: %s"
+TR_zh_FETCH_FAIL="获取 JDK 版本信息失败"
+TR_zh_FETCHING="正在获取可用的 JDK 版本..."
 TR_zh_LATEST_VERSION="最新可用版本: %s"
-TR_zh_ALREADY_INSTALLED="Maven 已经安装:"
+TR_zh_ALREADY_INSTALLED="JDK 已经安装:"
 TR_zh_VERSION_INFO="版本: %s"
-TR_zh_MAVEN_HOME="Maven 目录: %s"
-TR_zh_REINSTALL_PROMPT="是否重新安装/更新 Maven？(y/n): "
+TR_zh_JAVA_HOME="JAVA_HOME: %s"
+TR_zh_REINSTALL_PROMPT="是否重新安装/更新 JDK？(y/n): "
 TR_zh_INSTALL_CANCEL="安装已取消"
 TR_zh_ALREADY_LATEST="你已经安装了最新版本"
-TR_zh_CHECK_JDK="正在检查 Java 安装..."
-TR_zh_JDK_NOT_FOUND="未找到 Java (JDK)。Maven 需要 Java 才能运行。"
-TR_zh_JDK_FOUND="Java 已找到:"
-TR_zh_JDK_VERSION="Java 版本: %s"
-TR_zh_DOWNLOADING="正在下载 Maven %s..."
+TR_zh_DOWNLOADING="正在下载 JDK %s (%s)..."
 TR_zh_DOWNLOAD_COMPLETE="下载完成"
-TR_zh_DOWNLOAD_FAIL="下载 Maven 失败"
-TR_zh_INSTALLING="正在安装 Maven 到 %s..."
-TR_zh_REMOVING_OLD="正在移除旧的 Maven 安装..."
+TR_zh_DOWNLOAD_FAIL="下载 JDK 失败"
+TR_zh_INSTALLING="正在安装 JDK 到 %s..."
+TR_zh_REMOVING_OLD="正在移除旧的 JDK 安装..."
 TR_zh_EXTRACTING="正在解压压缩包..."
-TR_zh_EXTRACT_FAIL="安装失败: 未找到 Maven 目录"
-TR_zh_EXTRACT_SUCCESS="Maven 解压成功"
+TR_zh_EXTRACT_FAIL="安装失败: 未找到 JDK 目录"
+TR_zh_EXTRACT_SUCCESS="JDK 解压成功"
 TR_zh_CONFIGURING="正在配置环境变量..."
 TR_zh_BACKUP_CREATED="已创建备份: %s"
 TR_zh_ENV_ADDED="环境变量已添加到 %s"
-TR_zh_ENV_EXISTS="Maven 环境变量已存在于 %s"
+TR_zh_ENV_EXISTS="JDK 环境变量已存在于 %s"
 TR_zh_UPDATING_CONFIG="正在更新现有配置..."
 TR_zh_CONFIG_UPDATED="配置已更新"
 TR_zh_CONFIG_ERROR="检测到 %s 存在语法错误!"
 TR_zh_RESTORING_BACKUP="正在从备份恢复..."
 TR_zh_BACKUP_RESTORED="备份恢复成功"
 TR_zh_VERIFYING="正在验证安装..."
-TR_zh_INSTALL_SUCCESS="Maven 安装成功!"
+TR_zh_INSTALL_SUCCESS="JDK 安装成功!"
 TR_zh_VERIFY_FAIL="安装验证失败"
 TR_zh_SOURCE_TIP="请手动运行: source %s"
 TR_zh_INSTALL_COMPLETE="安装完成成功!"
-TR_zh_CONFIG_DONE="Maven 已配置完成"
-TR_zh_SOURCE_CURRENT="在当前终端使用 Maven，请运行:"
-TR_zh_AUTO_NEW="新开终端会自动生效 Maven 命令!"
+TR_zh_CONFIG_DONE="JDK 已配置完成"
+TR_zh_SOURCE_CURRENT="在当前终端使用 JDK，请运行:"
+TR_zh_AUTO_NEW="新开终端会自动生效 JDK 命令!"
 TR_zh_VERIFY_CMD="验证安装请运行:"
 TR_zh_CLEANING="正在清理临时文件..."
 TR_zh_CLEANUP_DONE="清理完成"
-TR_zh_UNINSTALL_TITLE="开始卸载 Maven..."
-TR_zh_FINDING_MAVEN="正在搜索已安装的 Maven..."
-TR_zh_MAVEN_NOT_FOUND="未找到已安装的 Maven"
-TR_zh_MAVEN_FOUND="在以下位置找到 Maven: %s"
-TR_zh_UNINSTALL_CONFIRM="确认要卸载 Maven 吗？这将删除 Maven 安装并清理环境变量。(y/n): "
+TR_zh_UNINSTALL_TITLE="开始卸载 JDK..."
+TR_zh_FINDING_JDK="正在搜索已安装的 JDK..."
+TR_zh_JDK_NOT_FOUND="未找到已安装的 JDK"
+TR_zh_JDK_FOUND="在以下位置找到 JDK: %s"
+TR_zh_UNINSTALL_CONFIRM="确认要卸载 JDK 吗？这将删除 JDK 安装并清理环境变量。(y/n): "
 TR_zh_UNINSTALL_CANCEL="卸载已取消"
-TR_zh_REMOVING_MAVEN="正在删除 Maven 安装目录..."
-TR_zh_REMOVING_MAVEN_DONE="Maven 安装目录已删除"
-TR_zh_REMOVING_ENV="正在从配置文件中移除 Maven 环境变量..."
-TR_zh_ENV_REMOVED="Maven 环境变量已移除"
-TR_zh_UNINSTALL_SUCCESS="Maven 卸载成功!"
+TR_zh_REMOVING_JDK="正在删除 JDK 安装目录..."
+TR_zh_REMOVING_JDK_DONE="JDK 安装目录已删除"
+TR_zh_REMOVING_ENV="正在从配置文件中移除 JDK 环境变量..."
+TR_zh_ENV_REMOVED="JDK 环境变量已移除"
+TR_zh_UNINSTALL_SUCCESS="JDK 卸载成功!"
 TR_zh_UNINSTALL_DONE="卸载完成"
 TR_zh_BACKUP_NOTE="配置文件的备份已创建，扩展名是 .bak"
 TR_zh_UNINSTALL_FINISH="卸载完成，请重启终端或运行: source %s"
-TR_zh_MAVEN_NOT_INSTALLED="Maven 未安装"
-TR_zh_MAVEN_INSTALLED="Maven 已安装"
+TR_zh_JDK_NOT_INSTALLED="JDK 未安装"
+TR_zh_JDK_INSTALLED="JDK 已安装"
 TR_zh_PRESS_ENTER="按回车键返回菜单..."
-TR_zh_SELECT_VERSION="选择 Maven 版本:"
-TR_zh_LATEST_VERSION_OPTION="安装最新版本 (推荐)"
+TR_zh_SELECT_VERSION="选择 JDK 版本:"
+TR_zh_LATEST_VERSION_OPTION="安装最新 LTS 版本 (推荐)"
+TR_zh_CHOOSE_LTS="选择 LTS 版本"
 TR_zh_CHOOSE_FROM_LIST="从可用版本中选择"
 TR_zh_ENTER_MANUALLY="手动输入版本号"
-TR_zh_AVAILABLE_VERSIONS="可用的 Maven 版本 (最新在前):"
+TR_zh_AVAILABLE_VERSIONS="可用的 JDK LTS 版本:"
 TR_zh_SELECT_FROM_LIST="选择版本 (1-%d): "
-TR_zh_ENTER_VERSION="输入 Maven 版本号 (例如 3.9.9): "
-TR_zh_INVALID_VERSION="版本格式无效。期望格式: X.Y.Z"
-TR_zh_FETCHING_VERSIONS="正在获取可用的 Maven 版本..."
+TR_zh_ENTER_VERSION="输入 JDK 版本号 (例如 21): "
+TR_zh_INVALID_VERSION="版本无效。可用版本: 8, 11, 17, 21"
+TR_zh_FETCHING_VERSIONS="正在获取可用的 JDK 版本..."
+TR_zh_SELECT_LTS="选择 LTS 版本:"
+TR_zh_LTS_VERSIONS="可用的 LTS 版本:"
 
 # Print functions (output to stderr to avoid capture in command substitution)
 print_info() {
@@ -244,22 +241,30 @@ select_language() {
     esac
 }
 
-# Detect operating system
-detect_os() {
-    local os_name=""
-    case "$(uname -s)" in
-        Linux)
-            os_name="Linux"
+# Detect system architecture
+detect_arch() {
+    local arch=$(uname -m)
+    case $arch in
+        x86_64)
+            echo "x64"
             ;;
-        Darwin)
-            os_name="macOS"
+        aarch64|arm64)
+            echo "aarch64"
+            ;;
+        armv7l|armhf)
+            echo "arm"
+            ;;
+        s390x)
+            echo "s390x"
+            ;;
+        ppc64le)
+            echo "ppc64le"
             ;;
         *)
-            print_error "$(tr UNSUPPORTED_OS): $(uname -s)"
+            print_error "$(printf "$(tr UNSUPPORTED_ARCH)" "$arch")"
             exit 1
             ;;
     esac
-    print_info "$(printf "$(tr DETECTED_OS)" "$os_name")"
 }
 
 # Select operation
@@ -315,39 +320,39 @@ check_root() {
     fi
 }
 
-# Get latest Maven version from official Apache website
-get_latest_version() {
+# Get latest LTS version from Adoptium API
+get_latest_lts_version() {
     print_info "$(tr FETCHING)"
-    # Use Maven official archive to get the latest version
-    local version=$(curl -s https://maven.apache.org/download.cgi | grep -o 'apache-maven-[0-9][0-9.]*-bin.tar.gz' | head -1 | sed -E 's/apache-maven-(.*)-bin\.tar\.gz/\1/')
+    # Get the latest LTS version (21, 17, 11, 8)
+    local version=$(curl -s "https://api.adoptium.net/v3/info/release_versions?release_type=ga&sort_method=DEFAULT&sort_order=DESC&vendor=eclipse" | grep -oP '"semver":\s*"\K[0-9]+' | head -1)
     if [[ -z "$version" ]]; then
-        # Fallback to a known good version if fetch fails
-        version="3.9.9"
+        # Fallback to a known good version
+        version="21"
         print_warning "Could not fetch latest version, using default: $version"
     fi
     echo "$version"
 }
 
-# List available Maven versions
+# List available LTS versions
 list_available_versions() {
     print_info "$(tr FETCHING_VERSIONS)"
-    local versions=$(curl -s https://archive.apache.org/dist/maven/maven-3/ | grep -oP 'href="\K[0-9]+\.[0-9]+\.[0-9]+(?=/")' | sort -V -r | head -20)
-    if [[ -z "$versions" ]]; then
-        print_error "$(tr FETCH_FAIL)"
-        return 1
-    fi
+    # Available LTS versions
+    local versions="21
+17
+11
+8"
     echo "$versions"
 }
 
-# Select Maven version interactively
-select_maven_version() {
+# Select JDK version interactively
+select_jdk_version() {
     echo
     echo "================================================"
     echo "$(tr SELECT_VERSION)"
     echo "================================================"
     echo
     echo "1) $(tr LATEST_VERSION_OPTION)"
-    echo "2) $(tr CHOOSE_FROM_LIST)"
+    echo "2) $(tr CHOOSE_LTS)"
     echo "3) $(tr ENTER_MANUALLY)"
     echo
     read -p "$(tr ENTER_CHOICE)" -r < /dev/tty
@@ -356,20 +361,16 @@ select_maven_version() {
     local version=""
     case $REPLY in
         1)
-            version=$(get_latest_version)
+            version=$(get_latest_lts_version)
             ;;
         2)
             local versions=$(list_available_versions)
-            if [[ $? -ne 0 || -z "$versions" ]]; then
-                print_error "$(tr FETCH_FAIL)"
-                return 1
-            fi
             echo
             echo "$(tr AVAILABLE_VERSIONS)"
             echo
             local i=1
             while IFS= read -r ver; do
-                echo "  $i) $ver"
+                echo "  $i) JDK $ver"
                 i=$((i + 1))
             done <<< "$versions"
             echo
@@ -386,7 +387,8 @@ select_maven_version() {
         3)
             read -p "$(tr ENTER_VERSION)" -r < /dev/tty
             echo
-            if [[ $REPLY =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            # Validate version (must be 8, 11, 17, or 21)
+            if [[ "$REPLY" =~ ^(8|11|17|21)$ ]]; then
                 version="$REPLY"
             else
                 print_error "$(tr INVALID_VERSION)"
@@ -402,103 +404,76 @@ select_maven_version() {
     echo "$version"
 }
 
-# Check if Maven is already installed
-check_existing_maven() {
-    if command -v mvn &> /dev/null; then
-        local mvn_version=$(mvn -v | head -n1 | awk '{print $3}')
-        local mvn_home=$(mvn -v | grep "Maven home" | awk '{print $3}')
-        if [[ -z "$mvn_home" ]]; then
-            mvn_home=$(which mvn | xargs dirname | xargs dirname)
+# Check if JDK is already installed
+check_existing_jdk() {
+    if command -v java &> /dev/null; then
+        local java_version=$(java -version 2>&1 | head -n 1 | grep -oP '[0-9]+\.[0-9]+\.[0-9]+' | head -1)
+        local java_home=$(java -XshowSettings:properties -version 2>&1 | grep "java.home" | awk '{print $3}')
+        if [[ -z "$java_home" ]]; then
+            java_home=$(dirname "$(dirname "$(readlink -f "$(which java)")")")
         fi
-        echo "$mvn_version|$mvn_home"
+        echo "$java_version|$java_home"
         return 0
     else
         # Check common locations
-        if [[ -d "/usr/local/maven/bin/mvn" ]]; then
-            local mvn_version=$(/usr/local/maven/bin/mvn -v | head -n1 | awk '{print $3}')
-            echo "$mvn_version|/usr/local/maven"
-            return 0
-        elif [[ -d "/usr/local/apache-maven"*"/bin/mvn" ]]; then
-            local mvn_dir=$(echo /usr/local/apache-maven-*)
-            local mvn_version=$($mvn_dir/bin/mvn -v | head -n1 | awk '{print $3}')
-            echo "$mvn_version|$mvn_dir"
-            return 0
-        elif [[ -d "$HOME/.local/maven/bin/mvn" ]]; then
-            local mvn_version=$($HOME/.local/maven/bin/mvn -v | head -n1 | awk '{print $3}')
-            echo "$mvn_version|$HOME/.local/maven"
-            return 0
+        if [[ -d "${INSTALL_DIR}/${JDK_DIR_NAME}" ]]; then
+            local java_bin="${INSTALL_DIR}/${JDK_DIR_NAME}/bin/java"
+            if [[ -x "$java_bin" ]]; then
+                local java_version=$("$java_bin" -version 2>&1 | head -n 1 | grep -oP '[0-9]+\.[0-9]+\.[0-9]+' | head -1)
+                echo "$java_version|${INSTALL_DIR}/${JDK_DIR_NAME}"
+                return 0
+            fi
         fi
         echo ""
         return 1
     fi
 }
 
-# Find Maven installation location
-find_maven_installation() {
+# Find JDK installation location
+find_jdk_installation() {
     local found_loc=""
-    local mvn_version=""
-    if command -v mvn &> /dev/null; then
-        mvn_version=$(mvn -v | head -n1 | awk '{print $3}')
-        found_loc=$(mvn -v | grep "Maven home" | awk '{print $3}')
-        if [[ -z "$found_loc" ]]; then
-            found_loc=$(dirname "$(dirname "$(which mvn)")")
-        fi
+    if command -v java &> /dev/null; then
+        found_loc=$(dirname "$(dirname "$(readlink -f "$(which java)")")")
     else
         # Check common locations
-        if [[ -d "/usr/local/maven" ]]; then
-            found_loc="/usr/local/maven"
-        elif [[ -d "/usr/local/apache-maven"* ]]; then
-            found_loc=$(echo /usr/local/apache-maven-* | head -n1)
-        elif [[ -d "$HOME/.local/maven" ]]; then
-            found_loc="$HOME/.local/maven"
-        elif [[ -d "$HOME/.local/apache-maven"* ]]; then
-            found_loc=$(echo "$HOME/.local/apache-maven-"* | head -n1)
+        if [[ -d "${INSTALL_DIR}/${JDK_DIR_NAME}" && -x "${INSTALL_DIR}/${JDK_DIR_NAME}/bin/java" ]]; then
+            found_loc="${INSTALL_DIR}/${JDK_DIR_NAME}"
+        elif [[ -d "$HOME/.local/${JDK_DIR_NAME}" && -x "$HOME/.local/${JDK_DIR_NAME}/bin/java" ]]; then
+            found_loc="$HOME/.local/${JDK_DIR_NAME}"
         fi
     fi
     echo "$found_loc"
 }
 
-# Check for Java (just check and warn, don't install)
-check_java() {
-    print_info "$(tr CHECK_JDK)"
-    if command -v java &> /dev/null; then
-        local java_version=$(java -version 2>&1 | head -n 1)
-        print_success "$(tr JDK_FOUND)"
-        print_info "$(printf "$(tr JDK_VERSION)" "$java_version")"
-        return 0
-    else
-        print_warning "$(tr JDK_NOT_FOUND)"
-        return 1
-    fi
-}
-
-# Download Maven
-download_maven() {
+# Download JDK from Adoptium
+download_jdk() {
     local version=$1
-    local filename="apache-maven-${version}-bin.tar.gz"
-    local download_url="https://archive.apache.org/dist/maven/maven-3/${version}/binaries/${filename}"
+    local arch=$2
+    local os="linux"
+    local image_type="jdk"
+    local release_type="ga"
+    local vendor="eclipse"
 
-    print_info "$(printf "$(tr DOWNLOADING)" "$version")"
+    # Construct download URL using Adoptium API
+    local download_url="https://api.adoptium.net/v3/binary/latest/${version}/${release_type}/${os}/${arch}/${image_type}/hotspot/normal/${vendor}"
+
+    print_info "$(printf "$(tr DOWNLOADING)" "$version" "$arch")"
     echo >&2
 
-    local temp_file="/tmp/${filename}"
+    local temp_file="/tmp/temurin-jdk-${version}-${os}-${arch}.tar.gz"
 
     # Track temp file for cleanup
     TEMP_FILES+=("$temp_file")
 
-    # Try wget first, then curl
-    if command -v wget &> /dev/null; then
-        if ! wget --progress=bar -O "$temp_file" "$download_url"; then
-            print_error "$(tr DOWNLOAD_FAIL)"
-            exit 1
-        fi
-    elif command -v curl &> /dev/null; then
-        if ! curl --progress-bar -L -o "$temp_file" "$download_url"; then
-            print_error "$(tr DOWNLOAD_FAIL)"
-            exit 1
-        fi
-    else
-        print_error "Neither wget nor curl found"
+    # Use curl with progress bar and follow redirects
+    if ! curl -L --progress-bar -o "$temp_file" "$download_url"; then
+        print_error "$(tr DOWNLOAD_FAIL)"
+        exit 1
+    fi
+
+    # Check if the downloaded file is valid
+    if [[ ! -s "$temp_file" ]]; then
+        print_error "$(tr DOWNLOAD_FAIL)"
         exit 1
     fi
 
@@ -508,18 +483,17 @@ download_maven() {
     echo "$temp_file"
 }
 
-# Install Maven
-install_maven() {
+# Install JDK
+install_jdk() {
     local archive=$1
-    local version=$2
 
     print_info "$(printf "$(tr INSTALLING)" "$INSTALL_DIR")"
 
     # Remove old installation if exists
-    local maven_install_dir="${INSTALL_DIR}/maven"
-    if [[ -d "$maven_install_dir" ]]; then
+    local jdk_install_dir="${INSTALL_DIR}/${JDK_DIR_NAME}"
+    if [[ -d "$jdk_install_dir" ]]; then
         print_info "$(tr REMOVING_OLD)"
-        rm -rf "$maven_install_dir"
+        rm -rf "$jdk_install_dir"
     fi
 
     # Extract archive
@@ -527,22 +501,24 @@ install_maven() {
     mkdir -p "$INSTALL_DIR"
     tar -C "$INSTALL_DIR" -xzf "$archive"
 
-    # Rename extracted directory to standard name
-    local extracted_dir="${INSTALL_DIR}/apache-maven-${version}"
-    if [[ ! -d "$extracted_dir" ]]; then
+    # Find the extracted directory (Temurin-jdk-XX.XX.XX-X)
+    local extracted_dir=$(find "$INSTALL_DIR" -maxdepth 1 -name "jdk-*" -type d | head -1)
+    if [[ -z "$extracted_dir" || ! -d "$extracted_dir" ]]; then
         print_error "$(tr EXTRACT_FAIL)"
         exit 1
     fi
-    mv "$extracted_dir" "$maven_install_dir"
+
+    # Rename to standard name
+    mv "$extracted_dir" "$jdk_install_dir"
 
     print_success "$(tr EXTRACT_SUCCESS)"
 
-    echo "$maven_install_dir"
+    echo "$jdk_install_dir"
 }
 
 # Configure environment variables
 configure_environment() {
-    local maven_home=$1
+    local jdk_home=$1
     print_info "$(tr CONFIGURING)"
 
     # Configuration files to update (system and user)
@@ -576,17 +552,17 @@ configure_environment() {
         cp "$config_file" "$backup_file"
         print_info "$(printf "$(tr BACKUP_CREATED)" "$backup_file")"
 
-        # Remove existing Maven configuration
-        sed -i '/# Maven Environment/d' "$config_file" 2>/dev/null || true
-        sed -i '/export M2_HOME/d' "$config_file" 2>/dev/null || true
-        sed -i '/maven\/bin/d' "$config_file" 2>/dev/null || true
+        # Remove existing JDK configuration
+        sed -i '/# Java JDK Environment/d' "$config_file" 2>/dev/null || true
+        sed -i '/export JAVA_HOME/d' "$config_file" 2>/dev/null || true
+        sed -i '/jdk\/bin/d' "$config_file" 2>/dev/null || true
 
         # Add new configuration
         cat >> "$config_file" <<EOF
 
-# Maven Environment
-export M2_HOME=${maven_home}
-export PATH=\$PATH:\$M2_HOME/bin
+# Java JDK Environment
+export JAVA_HOME=${jdk_home}
+export PATH=\$PATH:\$JAVA_HOME/bin
 EOF
     }
 
@@ -625,22 +601,22 @@ verify_installation() {
     print_info "$(tr VERIFYING)"
 
     # Load environment for verification
-    local maven_home="${INSTALL_DIR}/maven"
-    export M2_HOME="$maven_home"
-    export PATH="$PATH:$M2_HOME/bin"
+    local jdk_home="${INSTALL_DIR}/${JDK_DIR_NAME}"
+    export JAVA_HOME="$jdk_home"
+    export PATH="$PATH:$JAVA_HOME/bin"
 
-    if command -v mvn &> /dev/null; then
-        local mvn_version=$(mvn -v | head -n1)
+    if command -v java &> /dev/null; then
+        local java_version=$(java -version 2>&1 | head -n 1)
         print_success "$(tr INSTALL_SUCCESS)"
-        print_success "$(printf "$(tr VERSION_INFO)" "$mvn_version")"
-        print_info "$(printf "$(tr MAVEN_HOME)" "$(mvn -v | grep "Maven home" | awk '{print $3}')")"
+        print_success "$(printf "$(tr VERSION_INFO)" "$java_version")"
+        print_info "$(printf "$(tr JAVA_HOME)" "$JAVA_HOME")"
     else
         # Try the direct path
-        if [[ -x "${M2_HOME}/bin/mvn" ]]; then
-            local mvn_version=$(${M2_HOME}/bin/mvn -v | head -n1)
+        if [[ -x "${JAVA_HOME}/bin/java" ]]; then
+            local java_version=$("${JAVA_HOME}/bin/java" -version 2>&1 | head -n 1)
             print_success "$(tr INSTALL_SUCCESS)"
-            print_success "$(printf "$(tr VERSION_INFO)" "$mvn_version")"
-            print_info "$(printf "$(tr MAVEN_HOME)" "$M2_HOME")"
+            print_success "$(printf "$(tr VERSION_INFO)" "$java_version")"
+            print_info "$(printf "$(tr JAVA_HOME)" "$JAVA_HOME")"
         else
             print_error "$(tr VERIFY_FAIL)"
             print_info "$(printf "$(tr SOURCE_TIP)" "$HOME/.bashrc")"
@@ -649,19 +625,25 @@ verify_installation() {
     fi
 }
 
-# Uninstall Maven
-uninstall_maven() {
+# Uninstall JDK
+uninstall_jdk() {
     print_info "$(tr UNINSTALL_TITLE)"
-    print_info "$(tr FINDING_MAVEN)"
+    print_info "$(tr FINDING_JDK)"
 
-    local maven_location=$(find_maven_installation)
+    local jdk_location=$(find_jdk_installation)
 
-    if [[ -z "$maven_location" || ! -d "$maven_location" ]]; then
-        print_warning "$(tr MAVEN_NOT_FOUND)"
+    if [[ -z "$jdk_location" || ! -d "$jdk_location" ]]; then
+        print_warning "$(tr JDK_NOT_FOUND)"
         return
     fi
 
-    print_success "$(printf "$(tr MAVEN_FOUND)" "$maven_location")"
+    print_success "$(printf "$(tr JDK_FOUND)" "$jdk_location")"
+
+    # Show version
+    if [[ -x "$jdk_location/bin/java" ]]; then
+        local version=$("$jdk_location/bin/java" -version 2>&1 | head -n 1)
+        print_info "$(printf "$(tr VERSION_INFO)" "$version")"
+    fi
 
     # Confirm uninstall
     echo
@@ -672,11 +654,11 @@ uninstall_maven() {
         return
     fi
 
-    # Remove Maven installation directory
-    print_info "$(tr REMOVING_MAVEN)"
-    if [[ -d "$maven_location" ]]; then
-        rm -rf "$maven_location"
-        print_success "$(tr REMOVING_MAVEN_DONE)"
+    # Remove JDK installation directory
+    print_info "$(tr REMOVING_JDK)"
+    if [[ -d "$jdk_location" ]]; then
+        rm -rf "$jdk_location"
+        print_success "$(tr REMOVING_JDK_DONE)"
     fi
 
     # Remove environment variables from config files
@@ -704,10 +686,10 @@ uninstall_maven() {
             # Create backup
             local backup_file="${config_file}.bak.$(date +%s)"
             cp "$config_file" "$backup_file"
-            # Remove Maven configuration
-            sed -i '/# Maven Environment/d' "$config_file" 2>/dev/null || true
-            sed -i '/export M2_HOME/d' "$config_file" 2>/dev/null || true
-            sed -i '/maven\/bin/d' "$config_file" 2>/dev/null || true
+            # Remove JDK configuration
+            sed -i '/# Java JDK Environment/d' "$config_file" 2>/dev/null || true
+            sed -i '/export JAVA_HOME/d' "$config_file" 2>/dev/null || true
+            sed -i '/jdk\/bin/d' "$config_file" 2>/dev/null || true
         fi
     done
     print_success "$(tr ENV_REMOVED)"
@@ -724,19 +706,17 @@ uninstall_maven() {
     echo
 }
 
-# Check Maven status
+# Check JDK status
 check_status() {
     echo
-    if check_existing_maven; then
-        IFS='|' read -r mvn_version mvn_home <<< "$(check_existing_maven)"
-        print_success "$(tr MAVEN_INSTALLED)"
-        print_info "$(printf "$(tr VERSION_INFO)" "$mvn_version")"
-        print_info "$(printf "$(tr MAVEN_HOME)" "$mvn_home")"
+    if check_existing_jdk; then
+        IFS='|' read -r java_version java_home <<< "$(check_existing_jdk)"
+        print_success "$(tr JDK_INSTALLED)"
+        print_info "$(printf "$(tr VERSION_INFO)" "$java_version")"
+        print_info "$(printf "$(tr JAVA_HOME)" "$java_home")"
     else
-        print_warning "$(tr MAVEN_NOT_INSTALLED)"
+        print_warning "$(tr JDK_NOT_INSTALLED)"
     fi
-    echo
-    check_java || true
     echo
 }
 
@@ -770,16 +750,14 @@ main_install() {
 
     check_root
 
-    detect_os
+    local arch=$(detect_arch)
+    print_info "Detected architecture: $arch"
 
-    # Check Java but don't install it
-    check_java || true
-
-    local existing_info=$(check_existing_maven)
+    local existing_info=$(check_existing_jdk)
     if [[ -n "$existing_info" ]]; then
         IFS='|' read -r existing_version existing_home <<< "$existing_info"
         print_warning "$(printf "$(tr ALREADY_INSTALLED) %s" "$existing_version")"
-        print_info "$(printf "$(tr MAVEN_HOME)" "$existing_home")"
+        print_info "$(printf "$(tr JAVA_HOME)" "$existing_home")"
         read -p "$(printf "$(tr REINSTALL_PROMPT)")" -r < /dev/tty
         echo
         if [[ ! $REPLY =~ ^[Yy]$ ]]; then
@@ -788,21 +766,26 @@ main_install() {
         fi
     fi
 
-    local latest_version=$(select_maven_version)
-    if [[ $? -ne 0 || -z "$latest_version" ]]; then
+    local version=$(select_jdk_version)
+    if [[ $? -ne 0 || -z "$version" ]]; then
         print_error "$(tr INSTALL_CANCEL)"
         return
     fi
-    print_success "$(printf "$(tr LATEST_VERSION)" "$latest_version")"
+    print_success "$(printf "$(tr LATEST_VERSION)" "$version")"
 
-    if [[ "$existing_version" == "$latest_version" ]]; then
-        print_info "$(tr ALREADY_LATEST)"
-        return
+    # Check if already at this version
+    if [[ -n "$existing_info" ]]; then
+        IFS='|' read -r existing_version existing_home <<< "$existing_info"
+        local existing_major=$(echo "$existing_version" | grep -oP '^[0-9]+')
+        if [[ "$existing_major" == "$version" ]]; then
+            print_info "$(tr ALREADY_LATEST)"
+            return
+        fi
     fi
 
-    local archive=$(download_maven "$latest_version")
-    local maven_home=$(install_maven "$archive" "$latest_version")
-    configure_environment "$maven_home"
+    local archive=$(download_jdk "$version" "$arch")
+    local jdk_home=$(install_jdk "$archive")
+    configure_environment "$jdk_home"
     verify_installation
 
     echo
@@ -818,7 +801,7 @@ main_install() {
     print_info "$(tr AUTO_NEW)"
     echo
     print_info "$(tr VERIFY_CMD)"
-    echo -e "  ${GREEN}mvn -v${NC}"
+    echo -e "  ${GREEN}java -version${NC}"
     echo
 }
 
@@ -839,7 +822,7 @@ main() {
                 main_install
                 ;;
             uninstall)
-                uninstall_maven
+                uninstall_jdk
                 ;;
             exit)
                 exit 0
