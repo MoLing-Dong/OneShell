@@ -98,16 +98,16 @@ TR_en_JDK_INSTALLED="JDK is installed"
 TR_en_PRESS_ENTER="Press Enter to return to menu..."
 TR_en_SELECT_VERSION="Select JDK version:"
 TR_en_LATEST_VERSION_OPTION="Install latest LTS version (recommended)"
-TR_en_CHOOSE_LTS="Choose LTS version"
+TR_en_CHOOSE_LTS="Choose from version list"
 TR_en_CHOOSE_FROM_LIST="Choose from available versions"
 TR_en_ENTER_MANUALLY="Enter version manually"
 TR_en_AVAILABLE_VERSIONS="Available JDK LTS versions:"
 TR_en_SELECT_FROM_LIST="Select a version (1-%d): "
 TR_en_ENTER_VERSION="Enter JDK version (e.g., 21): "
-TR_en_INVALID_VERSION="Invalid version. Available: 8, 11, 17, 21"
+TR_en_INVALID_VERSION="Invalid version. Available: 8, 11, 17, 21, 22, 23, 24, 25"
 TR_en_FETCHING_VERSIONS="Fetching available JDK versions..."
-TR_en_SELECT_LTS="Select LTS version:"
-TR_en_LTS_VERSIONS="Available LTS versions:"
+TR_en_SELECT_LTS="Select version:"
+TR_en_LTS_VERSIONS="Available versions:"
 
 # Chinese
 TR_zh_TITLE="Java JDK 安装卸载管理器"
@@ -180,16 +180,16 @@ TR_zh_JDK_INSTALLED="JDK 已安装"
 TR_zh_PRESS_ENTER="按回车键返回菜单..."
 TR_zh_SELECT_VERSION="选择 JDK 版本:"
 TR_zh_LATEST_VERSION_OPTION="安装最新 LTS 版本 (推荐)"
-TR_zh_CHOOSE_LTS="选择 LTS 版本"
+TR_zh_CHOOSE_LTS="从版本列表中选择"
 TR_zh_CHOOSE_FROM_LIST="从可用版本中选择"
 TR_zh_ENTER_MANUALLY="手动输入版本号"
 TR_zh_AVAILABLE_VERSIONS="可用的 JDK LTS 版本:"
 TR_zh_SELECT_FROM_LIST="选择版本 (1-%d): "
 TR_zh_ENTER_VERSION="输入 JDK 版本号 (例如 21): "
-TR_zh_INVALID_VERSION="版本无效。可用版本: 8, 11, 17, 21"
+TR_zh_INVALID_VERSION="版本无效。可用版本: 8, 11, 17, 21, 22, 23, 24, 25"
 TR_zh_FETCHING_VERSIONS="正在获取可用的 JDK 版本..."
-TR_zh_SELECT_LTS="选择 LTS 版本:"
-TR_zh_LTS_VERSIONS="可用的 LTS 版本:"
+TR_zh_SELECT_LTS="选择版本:"
+TR_zh_LTS_VERSIONS="可用的版本:"
 
 # Print functions (output to stderr to avoid capture in command substitution)
 print_info() {
@@ -320,10 +320,10 @@ check_root() {
     fi
 }
 
-# Get latest LTS version from Adoptium API
+# Get latest version from Adoptium API
 get_latest_lts_version() {
     print_info "$(tr FETCHING)"
-    # Get the latest LTS version (21, 17, 11, 8)
+    # Get the latest version (25, 24, 23, 22, 21, 17, 11, 8)
     local version=$(curl -s "https://api.adoptium.net/v3/info/release_versions?release_type=ga&sort_method=DEFAULT&sort_order=DESC&vendor=eclipse" | grep -oP '"semver":\s*"\K[0-9]+' | head -1)
     if [[ -z "$version" ]]; then
         # Fallback to a known good version
@@ -333,11 +333,15 @@ get_latest_lts_version() {
     echo "$version"
 }
 
-# List available LTS versions
+# List available versions
 list_available_versions() {
     print_info "$(tr FETCHING_VERSIONS)"
-    # Available LTS versions
-    local versions="21
+    # Available versions (LTS + recent releases)
+    local versions="25
+24
+23
+22
+21
 17
 11
 8"
@@ -387,8 +391,8 @@ select_jdk_version() {
         3)
             read -p "$(tr ENTER_VERSION)" -r < /dev/tty
             echo
-            # Validate version (must be 8, 11, 17, or 21)
-            if [[ "$REPLY" =~ ^(8|11|17|21)$ ]]; then
+            # Validate version (must be 8, 11, 17, 21, 22, 23, 24, or 25)
+            if [[ "$REPLY" =~ ^(8|11|17|21|22|23|24|25)$ ]]; then
                 version="$REPLY"
             else
                 print_error "$(tr INVALID_VERSION)"
